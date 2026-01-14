@@ -68,6 +68,29 @@ export async function verifyChecksum(filePath, expectedHex) {
 
 export async function downloadToTemp(url, destPath, expectedSha256 = null) {
   return new Promise((resolve, reject) => {
+    // Support file:// URLs for local testing convenience
+    if (url.startsWith('file://')) {
+      (async () => {
+        try {
+          const src = new URL(url).pathname;
+          await fs.copyFile(src, destPath);
+          if (expectedSha256) {
+            const ok = await verifyChecksum(destPath, expectedSha256);
+            if (!ok) {
+              await fs.unlink(destPath).catch(()=>{});
+              console.error('downloadToTemp: checksum mismatch for', destPath);
+              return reject(new Error('Checksum mismatch'));
+            }
+          }
+          return resolve(destPath);
+        } catch (e) {
+          await fs.unlink(destPath).catch(()=>{});
+          return reject(e);
+        }
+      })();
+      return;
+    }
+
     const file = createWriteStream(destPath);
     const getter = url.startsWith('https') ? https.get : http.get;
     getter(url, (res) => {
@@ -81,7 +104,10 @@ export async function downloadToTemp(url, destPath, expectedSha256 = null) {
         return;
       }
       res.pipe(file);
-      file.on('close', async () => {
+      let finished = false;
+      const cleanResolve = async () => {
+        if (finished) return;
+        finished = true;
         try {
           if (expectedSha256) {
             const ok = await verifyChecksum(destPath, expectedSha256);
@@ -91,12 +117,22 @@ export async function downloadToTemp(url, destPath, expectedSha256 = null) {
               return reject(new Error('Checksum mismatch'));
             }
           }
-          resolve(destPath);
+          clearTimeout(timeout);
+          return resolve(destPath);
         } catch (e) {
           await fs.unlink(destPath).catch(()=>{});
-          reject(e);
+          clearTimeout(timeout);
+          return reject(e);
         }
-      });
+      };
+      file.on('finish', cleanResolve);
+      file.on('close', cleanResolve);
+      const timeout = setTimeout(async () => {
+        if (!finished) {
+          await fs.unlink(destPath).catch(()=>{});
+          return reject(new Error('Download timeout'));
+        }
+      }, 30_000);
     }).on('error', async (err) => {
       await fs.unlink(destPath).catch(()=>{});
       reject(err);
