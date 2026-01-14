@@ -1,0 +1,79 @@
+#!/usr/bin/env node
+import {argv, exit} from 'process';
+import * as pm from '../src/protonManager/index.js';
+
+async function help() {
+  console.log(`ugl-proton - Proton-GE manager
+
+Usage:
+  ugl-proton list
+  ugl-proton install <version> <url> [sha256] [sig-url] [pubkey-url]
+  ugl-proton install-archive <version> <archive-path>
+  ugl-proton remove <version>
+  ugl-proton set-default <version>
+  ugl-proton get-default
+
+Notes:
+  - When specified, [sha256] is used to verify downloaded archives.
+  - Optionally, provide [sig-url] and [pubkey-url] to verify a detached GPG signature for the archive.
+`);
+}
+
+async function main() {
+  const [,,cmd, a, b] = argv;
+  try {
+    switch(cmd) {
+      case 'list': {
+        const v = await pm.listInstalledVersions();
+        console.log(v.join('\n'));
+        break;
+      }
+      case 'install': {
+        if (!a || !b) return help();
+        console.log('Downloading and installing', a);
+        // argv[4] = sha256, argv[5] = sig-url, argv[6] = pubkey-url
+        const sha = argv[4];
+        const sig = argv[5];
+        const key = argv[6];
+        const archivePath = await pm.installFromUrl(a, b, sha);
+        if (sig && key) {
+          console.log('Verifying signature...');
+          await pm.verifyGpgSignature(archivePath, sig, key);
+          console.log('Signature verified');
+        }
+        console.log('Installed', a);
+        break;
+      }
+      case 'install-archive': {
+        if (!a || !b) return help();
+        console.log('Installing from archive', b);
+        await pm.installFromArchive(b, a);
+        console.log('Installed', a);
+        break;
+      }
+      case 'remove': {
+        if (!a) return help();
+        await pm.removeVersion(a);
+        console.log('Removed', a);
+        break;
+      }
+      case 'set-default': {
+        if (!a) return help();
+        await pm.setDefaultVersion(a);
+        console.log('Set default to', a);
+        break;
+      }
+      case 'get-default': {
+        console.log(await pm.getDefaultVersion());
+        break;
+      }
+      default:
+        help();
+    }
+  } catch (e) {
+    console.error('Error:', e.message);
+    exit(1);
+  }
+}
+
+main();

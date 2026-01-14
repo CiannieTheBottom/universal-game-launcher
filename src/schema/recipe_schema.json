@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UGL Installer Recipe",
+  "type": "object",
+  "required": ["id", "name"],
+  "properties": {
+    "id": {"type": "string"},
+    "name": {"type": "string"},
+    "version": {"type": "string"},
+    "store": {"type": "string"},
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {"type": "string"},
+          "url": {"type": "string", "format": "uri"},
+          "sha256": {"type": "string"}
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "properties": {
+        "type": {"type": "string", "enum": ["proton", "wine", "native"]},
+        "proton_version": {"type": "string"}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "env": {"type": "object"},
+        "wine_prefix": {"type": "string"}
+      }
+    },
+    "installer_steps": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
+    "post_install": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
+    "launch": {"type": "object"},
+    "checks": {"type": "object"},
+    "metadata": {"type": "object"}
+  }
+}

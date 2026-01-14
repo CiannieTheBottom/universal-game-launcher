@@ -1,0 +1,17 @@
+{
+  "name": "universal-game-launcher",
+  "version": "0.1.0",
+  "description": "Cross-platform game launcher that bundles Proton-GE on Linux",
+  "type": "module",
+  "main": "src/protonManager/index.js",
+  "bin": {
+    "ugl-proton": "bin/ugl-proton"
+  },
+  "scripts": {
+    "test": "node --test tests/protonManager.test.js tests/protonManager.checksum.test.js tests/protonManager.gpg.test.js tests/protonManager.fetch.test.js",
+    "lint": "echo 'no lint configured'"
+  },
+  "keywords": ["proton", "proton-ge", "game-launcher"],
+  "author": "",
+  "license": "MIT"
+}

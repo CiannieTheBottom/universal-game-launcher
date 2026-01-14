@@ -1,0 +1,26 @@
+# Sample Steam recipe (for non-Steam native install or manual Steam game wrapper)
+
+id: "steam-native-example"
+name: "Steam Native Example"
+version: "1.0"
+store: steam
+runtime:
+  type: native
+
+installer_steps:
+  - name: link-steam-folder
+    run: |
+      # For a native game installed via Steam, simply record path and metadata
+      echo "steam_app_123456" > "$INSTALL_DIR/.steam_id"
+
+launch:
+  exe: "$INSTALL_DIR/game_executable"
+  args: ["--windowed"]
+
+checks:
+  pre:
+    - type: disk-space
+      min: 1000
+  post:
+    - type: exists
+      path: "$INSTALL_DIR/game_executable"

@@ -1,0 +1,46 @@
+# Sample GOG recipe (installer + launch using managed Proton-GE)
+
+id: "gog-aurora-example"
+name: "Aurora (GOG example)"
+version: "1.0"
+store: gog
+sources:
+  - type: url
+    url: "https://example.com/Aurora-Setup.exe"
+    sha256: "<replace-with-checksum>"
+
+runtime:
+  type: proton
+  proton_version: "proton-ge-8-22"
+
+environment:
+  env:
+    DXVK_HUD: "0"
+  wine_prefix: "ugl-gog-aurora"
+
+installer_steps:
+  - name: download-installer
+    run: |
+      mkdir -p "$XDG_CACHE/ugl/aurora"
+      curl -L -o "$XDG_CACHE/ugl/aurora/Aurora-Setup.exe" "${{ sources[0].url }}"
+  - name: run-installer
+    run: |
+      # Use the managed proton wrapper
+      $PROTON_BIN run "$XDG_CACHE/ugl/aurora/Aurora-Setup.exe"
+
+post_install:
+  - name: verify-install
+    run: |
+      test -f "$WINEPREFIX/drive_c/Program Files/Aurora/aurora.exe"
+
+launch:
+  exe: "$WINEPREFIX/drive_c/Program Files/Aurora/aurora.exe"
+  args: ["--fullscreen"]
+
+checks:
+  pre:
+    - type: disk-space
+      min: 3000
+  post:
+    - type: exists
+      path: "$WINEPREFIX/drive_c/Program Files/Aurora/aurora.exe"

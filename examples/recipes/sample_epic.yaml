@@ -1,0 +1,44 @@
+# Sample Epic installer recipe (installer + launch using managed Proton-GE)
+
+id: "epic-minisample"
+name: "Epic Mini (Epic example)"
+version: "0.1"
+store: epic
+sources:
+  - type: url
+    url: "https://example.com/EpicGameInstaller.exe"
+
+runtime:
+  type: proton
+  proton_version: "latest-managed"
+
+environment:
+  env:
+    DXVK_HUD: "1"
+  wine_prefix: "ugl-epic-minisample"
+
+installer_steps:
+  - name: download-installer
+    run: |
+      mkdir -p "$XDG_CACHE/ugl/epic-minisample"
+      curl -L -o "$XDG_CACHE/ugl/epic-minisample/installer.exe" "${{ sources[0].url }}"
+  - name: run-installer
+    run: |
+      $PROTON_BIN run "$XDG_CACHE/ugl/epic-minisample/installer.exe"
+
+post_install:
+  - name: check_exe
+    run: |
+      test -f "$WINEPREFIX/drive_c/Program Files/EpicGame/game.exe"
+
+launch:
+  exe: "$WINEPREFIX/drive_c/Program Files/EpicGame/game.exe"
+  args: []
+
+checks:
+  pre:
+    - type: disk-space
+      min: 1500
+  post:
+    - type: exists
+      path: "$WINEPREFIX/drive_c/Program Files/EpicGame/game.exe"
