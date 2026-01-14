@@ -81,7 +81,10 @@ export async function downloadToTemp(url, destPath, expectedSha256 = null) {
         return;
       }
       res.pipe(file);
-      file.on('close', async () => {
+      let finished = false;
+      const cleanResolve = async () => {
+        if (finished) return;
+        finished = true;
         try {
           if (expectedSha256) {
             const ok = await verifyChecksum(destPath, expectedSha256);
@@ -91,12 +94,22 @@ export async function downloadToTemp(url, destPath, expectedSha256 = null) {
               return reject(new Error('Checksum mismatch'));
             }
           }
-          resolve(destPath);
+          clearTimeout(timeout);
+          return resolve(destPath);
         } catch (e) {
           await fs.unlink(destPath).catch(()=>{});
-          reject(e);
+          clearTimeout(timeout);
+          return reject(e);
         }
-      });
+      };
+      file.on('finish', cleanResolve);
+      file.on('close', cleanResolve);
+      const timeout = setTimeout(async () => {
+        if (!finished) {
+          await fs.unlink(destPath).catch(()=>{});
+          return reject(new Error('Download timeout'));
+        }
+      }, 30_000);
     }).on('error', async (err) => {
       await fs.unlink(destPath).catch(()=>{});
       reject(err);
