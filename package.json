@@ -8,8 +8,13 @@
     "ugl-proton": "bin/ugl-proton"
   },
   "scripts": {
-    "test": "node --test tests/protonManager.test.js tests/protonManager.checksum.test.js tests/protonManager.gpg.test.js tests/protonManager.fetch.test.js",
+    "test": "node --test tests/protonManager.test.js tests/protonManager.checksum.test.js tests/protonManager.gpg.test.js tests/protonManager.fetch.test.js tests/protonApi.test.js",
+    "test:api": "node --test tests/protonApi.test.js",
+    "start:api": "node src/api/server.js",
     "lint": "echo 'no lint configured'"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
   },
   "keywords": ["proton", "proton-ge", "game-launcher"],
   "author": "",
