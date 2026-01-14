@@ -1,5 +1,7 @@
 # Universal Game Launcher (UGL)
 
+[![CI](https://github.com/CiannieTheBottom/universal-game-launcher/actions/workflows/ci.yml/badge.svg)](https://github.com/CiannieTheBottom/universal-game-launcher/actions/workflows/ci.yml)
+
 A cross-platform game launcher (Linux + Windows) that bundles Proton-GE on Linux, integrates with Steam/GOG/Epic, and provides a scriptable installer/runner engine.
 
 What’s in this scaffold:
