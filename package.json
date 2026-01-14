@@ -14,9 +14,13 @@
     "lint": "echo 'no lint configured'"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.22.1"
   },
-  "keywords": ["proton", "proton-ge", "game-launcher"],
+  "keywords": [
+    "proton",
+    "proton-ge",
+    "game-launcher"
+  ],
   "author": "",
   "license": "MIT"
 }
