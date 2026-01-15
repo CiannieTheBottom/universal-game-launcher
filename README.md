@@ -10,9 +10,7 @@ What’s in this scaffold:
 - `examples/recipes/` — sample recipes for GOG, Epic, Steam
 - `docs/proton_integration.md` — plan for bundling Proton-GE and invoking it
 
-Next steps:
+Next steps on the to do list:
 - Implement Proton-GE manager (download/verify/install)
 - Implement runner engine (create prefixes, run installers, launch games)
 - Build a minimal backend + Tauri frontend to test flows
-
-If you want, I can scaffold a minimal Tauri + Node backend next.
